@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use function GuzzleHttp\Psr7\parse_query;
+use Illuminate\Http\Request;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 
@@ -10,6 +11,20 @@ class GetController extends Controller
 {
     protected $manager;
     protected $savePath;
+    protected $cachePath;
+
+    const PRESET_TEMPLATE = [
+        'h' => [
+            'w' => 1000,
+        ],
+        'm' => [
+            'w' => 400,
+        ],
+        's' => [
+            'w' => 200,
+        ]
+    ];
+
 
     public function __construct()
     {
@@ -17,9 +32,10 @@ class GetController extends Controller
             'driver' => 'imagick',
         ]);
         $this->savePath = realpath(env('IMAGE_PATH', sys_get_temp_dir() . '/image_server'));
+        $this->cachePath = realpath(env('CACHE_PATH', sys_get_temp_dir() . '/image_server'));
     }
 
-    public function get($query)
+    public function get($query, Request $request)
     {
         // 使用`!`作为参数分割符
         $exploded = explode('!', $query);
@@ -38,6 +54,36 @@ class GetController extends Controller
         // 获取参数
         $params = parse_query($exploded[1] ?? '');
 
+        // 处理图片
+        $this->parseImage($image, $params);
+
+        // 图片路径
+        $imagePath = $this->cachePath . DIRECTORY_SEPARATOR . $query;
+
+        // 创建目录
+        $dirName = dirname($imagePath);
+        if (!is_dir($dirName)) {
+            mkdir($dirName, 0755, true);
+        }
+
+        // 保存图片
+        $image->save($imagePath, 60);
+
+        // 直接返回一个图片响应 TODO 添加缓存控制
+        return $image->response(null, 60);
+    }
+
+    /**
+     * @param Image $image
+     * @param array $params
+     */
+    protected function parseImage($image, $params = [])
+    {
+        if (isset($params['pt'])) {
+            // 使用了预置样式
+            $pt = $params['pt'];
+            $this->parseImage($image, static::PRESET_TEMPLATE[$pt] ?? []);
+        }
         if (isset($params['w']) || isset($params['h'])) {
             $this->parseResize($image, $params['w'] ?? null, $params['h'] ?? null);
         }
@@ -45,11 +91,6 @@ class GetController extends Controller
         $image->interlace(); // 使用交错，jpg图片可以渐进加载
         $image->getCore()->stripImage(); // 去除图片的exif
         $image->encode('jpg');
-
-        // 保存图片
-        $image->save($this->savePath . DIRECTORY_SEPARATOR . $query, 60);
-
-        return $image->response(null, 60);
     }
 
     /**
