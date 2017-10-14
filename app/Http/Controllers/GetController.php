@@ -44,7 +44,7 @@ class GetController extends Controller
 
         // 检查文件是否存在
         if (!file_exists($realPath)) {
-            return response('image not found!', 404);
+            abort(404, 'Not Found Image.');
         }
 
         // 加载图片

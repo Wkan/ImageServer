@@ -22,19 +22,13 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         if (!$request->hasFile('image')) {
-            return [
-                'error'   => 1,
-                'message' => '没有上传的图片'
-            ];
+            abort(422, 'Cant find upload image.');
         }
 
         $imageFile = $request->file('image');
 
         if (!$imageFile->isValid()) {
-            return [
-                'error'   => 1,
-                'message' => $imageFile->getErrorMessage(),
-            ];
+            abort(422, $imageFile->getErrorMessage());
         }
 
         // 加载图片
@@ -53,13 +47,13 @@ class UploadController extends Controller
 
         $image->save($imagePath);
 
-        return [
+        return response()->json([
             'error'   => 0,
             'data'    => [
                 'key' => $imageHashKey,
             ],
             'message' => '图片保存成功',
-        ];
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     protected function getSavePathOfKey($key)
