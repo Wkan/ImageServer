@@ -50,22 +50,15 @@ class UploadController extends Controller
         if (!is_dir($dirName)) {
             mkdir($dirName, 0755, true);
         }
-        $success = $image->save($imagePath);
 
-        if ($success) {
-            return [
-                'error'   => 0,
-                'data'    => [
-                    'key' => $imageHashKey,
-                ],
-                'message' => '图片保存成功',
-            ];
-        }
+        $image->save($imagePath);
 
         return [
-            'error'   => 1,
-            'data'    => null,
-            'message' => '图片处理/保存失败',
+            'error'   => 0,
+            'data'    => [
+                'key' => $imageHashKey,
+            ],
+            'message' => '图片保存成功',
         ];
     }
 
