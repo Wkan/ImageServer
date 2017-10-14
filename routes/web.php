@@ -11,5 +11,6 @@
 |
 */
 
-$router->post('/upload', 'UploadController@upload');
-$router->get('/images/{query:.+}', 'GetController@get');
+/** @var \FastRoute\RouteCollector $router */
+$router->post('/upload', ['as' => 'upload', 'uses' => 'UploadController@upload']);
+$router->get('/images/{query:.+}', ['as' => 'get', 'uses' => 'GetController@get']);

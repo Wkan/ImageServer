@@ -51,6 +51,7 @@ class UploadController extends Controller
             'error'   => 0,
             'data'    => [
                 'key' => $imageHashKey,
+                'url' => route('get', ['query' => $imageHashKey]),
             ],
             'message' => '图片保存成功',
         ], 200, [], JSON_UNESCAPED_UNICODE);
