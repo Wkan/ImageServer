@@ -67,10 +67,10 @@ class GetController extends Controller
         }
 
         // 保存图片
-        $image->save($imagePath, 60);
+        $image->save($imagePath, 75);
 
         // 直接返回一个图片响应 TODO 添加缓存控制
-        return $image->response(null, 60);
+        return $image->response(null, 75);
     }
 
     /**
