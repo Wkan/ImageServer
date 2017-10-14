@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use function GuzzleHttp\Psr7\parse_query;
-use Illuminate\Http\Request;
 use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 
