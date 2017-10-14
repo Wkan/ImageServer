@@ -35,7 +35,7 @@ class GetController extends Controller
         $this->cachePath = realpath(env('CACHE_PATH', sys_get_temp_dir() . '/image_server'));
     }
 
-    public function get($query, Request $request)
+    public function get($query)
     {
         // 使用`!`作为参数分割符
         $exploded = explode('!', $query);
@@ -67,10 +67,13 @@ class GetController extends Controller
         }
 
         // 保存图片
-        $image->save($imagePath, 75);
+        file_put_contents($imagePath, $image);
 
-        // 直接返回一个图片响应 TODO 添加缓存控制
-        return $image->response(null, 75);
+        // 直接返回一个图片响应
+        return response($image)
+            ->header('Content-Type', $image->mime())
+            ->header('Content-Length', strlen($image))
+            ->header('Cache-Control', 'max-age=2592000');
     }
 
     /**
@@ -90,7 +93,7 @@ class GetController extends Controller
 
         $image->interlace(); // 使用交错，jpg图片可以渐进加载
         $image->getCore()->stripImage(); // 去除图片的exif
-        $image->encode('jpg');
+        $image->encode('jpg', $params['q'] ?? 75);
     }
 
     /**
