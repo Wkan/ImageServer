@@ -1,0 +1,23 @@
+server {
+    listen       80;
+    server_name  image.server;
+
+    access_log  /path/to/access.log;
+
+    root /path/to/ImageServer/public;
+
+    index index.php;
+
+    location ~ [^/]\.php(/|$) {
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi.conf;
+    }
+
+    location ~* ^/images/(.+) {
+        default_type image;
+        alias /path/to/images;
+        expires 30d;
+        try_files /origin/$1 /cache/$1 /index.php?$query_string;
+    }
+}
